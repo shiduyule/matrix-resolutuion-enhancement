@@ -1,0 +1,68 @@
+#%% 导入模块 import modules
+import matplotlib.pyplot as plt  
+import numpy as np
+
+ 
+#%% 矩阵输入 matrix input
+
+data2d = np.array([
+        
+    [-1,  -0.8, -0.1,  0.2,  1.1,  1.2,  1.1,  0.2, -0.9 ],
+    [-0.3, 0.1,  0.1, -0.1,  0.5, 1.25, 1.15, 0.25,  0.1],
+    [-0.2,-0.1,  0.1,    0,  1.0,  1.5,  0.2,  0.3,  0.4],
+    [0.2, -0.1,  1.1,  0.2, -0.1,  0.0,  1.1,  1.2,  0.0], 
+    [0.3,  0.4,  0.1, -0.7,  0.2,  0.1,  0.2, -0.1,  0.2],
+    [0.2,  0.8,  0.5, -0.3, -0.1,  0.7,  0.0, -0.2,  0.0],
+    [0.8,  1.1,  0.9,  1.2,  0.2, -0.2, -0.1,  0.0,  0.0],
+    [-0.7, 0.4,  0.5,  0.9,  1.2,  0.0,  0.0,  1.0,  0.0],
+    [-0.9, 0.2,  0.3,  0.4,  1.3,  0.1, -0.2,  0.7,  0.6]  ])
+        
+data2d = data2d[::-1]  # 考虑到 imshow 函数的 从下往上画 
+#%% 矩阵扩充  matrix expand 至少扩充到 100 * 100
+row = np.shape(data2d)[0]  #行数  
+column = np.shape(data2d)[1]  #列数
+    #=============================================================================
+    #%%扩充列数  设置density 即可
+j = 0
+density = 15   # 插入的矩阵行数为data2d的行数  列数为设置的密度值  # 2  20
+while True: 
+    insertcolumn = np.empty([np.shape(data2d)[0] ,density], dtype = float)
+    i = 0
+    while i < np.shape(data2d)[0]:  # 当行数在总行数范围内
+        insertcolumn[i,:] = np.linspace(data2d[i,j],data2d[i,j+1],density+1,endpoint = False)[1:density+1] # 以第i行第j列 和第i行第j+1列为起始值   这里是 5行 10列数组   ## 注意数组 索引的左闭右开 
+        i = i + 1 
+        # print(j,i)
+        # print('\n')    
+    insertcolumn = insertcolumn.transpose()
+    data2d = np.insert(data2d, j+1,insertcolumn, axis=1) # 插入density列
+    j = j + 1 + density 
+    column_now = np.shape(data2d)[1]
+    if column_now >= ((column-1)*density + column):
+        break
+#============================================================================
+#%%扩充行数
+i = 0
+
+while True:
+    insertline = np.empty([density,np.shape(data2d)[1]], dtype = float)
+    j = 0   # 从第1列开始
+    while j < np.shape(data2d)[1] :  # 当列数在总列数范围内
+        insertline[:,j] = np.linspace(data2d[i,j],data2d[i+1,j],density+1,endpoint = False)[1:density+1]  # 将第i行和第i加一行的中间值赋给insertline的第j列
+        j = j + 1 
+        
+    data2d = np.insert(data2d, i+1,insertline, axis=0) # 插入多行
+    i = i + 1 + density 
+    row_now = np.shape(data2d)[0]  # 目前行数
+    if row_now == (row-1)*density + row:
+        break
+    
+#%% 创建画布
+fig, ax = plt.subplots(figsize = (5.4,4),dpi = 600) 
+  
+im = ax.imshow(data2d,origin='lower' ,cmap = 'gray')   #       jet  viridis
+
+#%% 坐标轴 标题 图例
+
+fig.colorbar(im, ax=ax, label='intensity',fraction=0.046, pad=0.04)  
+plt.rc('font', family='Times New Roman', size=13)
+plt.show()
